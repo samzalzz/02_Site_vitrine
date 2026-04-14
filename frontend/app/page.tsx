@@ -1,65 +1,97 @@
-import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/Button";
+import { Card, CardBody } from "@/components/Card";
+
+export const metadata = {
+  title: "Home | Portfolio",
+  description: "Welcome to my professional portfolio. Explore my projects and expertise in fullstack development.",
+};
 
 export default function Home() {
+  const expertiseItems = [
+    {
+      emoji: "⚛️",
+      title: "Frontend Development",
+      description: "Building beautiful, responsive user interfaces with React, Next.js, and modern CSS frameworks like Tailwind CSS.",
+    },
+    {
+      emoji: "🔧",
+      title: "Backend Development",
+      description: "Creating robust APIs and server-side applications with Node.js, Express, and databases like PostgreSQL and MongoDB.",
+    },
+    {
+      emoji: "🚀",
+      title: "DevOps & Deployment",
+      description: "Deploying applications to production with Docker, CI/CD pipelines, and cloud platforms like Vercel and AWS.",
+    },
+  ];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="bg-white px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <h1 className="text-5xl font-bold tracking-tight text-neutral-900 sm:text-6xl mb-6">
+            Fullstack Developer
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-xl text-neutral-600 mb-8 leading-relaxed">
+            I craft beautiful, functional web experiences using modern technologies. Specialized in fullstack development with a passion for clean code and great user experiences.
           </p>
+          <div className="flex gap-4 justify-center flex-wrap">
+            <Link href="/projects">
+              <Button variant="primary" size="lg">
+                View Projects
+              </Button>
+            </Link>
+            <Link href="/contact">
+              <Button variant="secondary" size="lg">
+                Get in Touch
+              </Button>
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Expertise Section */}
+      <section className="bg-neutral-50 px-4 py-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="text-4xl font-bold text-center text-neutral-900 mb-12">
+            Expertise
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {expertiseItems.map((item, index) => (
+              <Card key={index}>
+                <CardBody className="text-center">
+                  <div className="text-5xl mb-4">{item.emoji}</div>
+                  <h3 className="text-xl font-bold text-neutral-900 mb-3">
+                    {item.title}
+                  </h3>
+                  <p className="text-neutral-600 text-sm leading-relaxed">
+                    {item.description}
+                  </p>
+                </CardBody>
+              </Card>
+            ))}
+          </div>
         </div>
-      </main>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-primary-600 px-4 py-16 sm:px-6 lg:px-8 md:py-24">
+        <div className="mx-auto max-w-2xl rounded-lg bg-white p-8 md:p-16 text-center shadow-lg">
+          <h2 className="text-3xl font-bold text-neutral-900 mb-4">
+            Let's Work Together
+          </h2>
+          <p className="text-neutral-600 mb-8 text-lg">
+            Have a project in mind? I'd love to help bring your ideas to life. Let's start building something amazing together.
+          </p>
+          <Link href="/contact">
+            <Button variant="secondary" size="lg">
+              Start a Project
+            </Button>
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

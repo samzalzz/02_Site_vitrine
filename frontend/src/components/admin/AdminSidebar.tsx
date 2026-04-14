@@ -11,6 +11,7 @@ const NAV = [
   { href: '/admin/skills', label: 'Skills' },
   { href: '/admin/contact', label: 'Contact' },
   { href: '/admin/newsletter', label: 'Newsletter' },
+  { href: '/admin/users', label: 'Admin Users' },
 ];
 
 export function AdminSidebar() {

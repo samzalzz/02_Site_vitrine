@@ -38,9 +38,30 @@ export const newsletterSchema = z.object({
   email: z.string().email(),
 });
 
+// Auth and user management schemas
+export const loginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+export const createUserSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  name: z.string().min(1, 'Name is required'),
+  role: z.enum(['admin']).default('admin'),
+});
+
+export const updateUserSchema = z.object({
+  name: z.string().min(1).optional(),
+  role: z.enum(['admin']).optional(),
+});
+
 // Export TypeScript types
 export type ProjectInput = z.infer<typeof projectSchema>;
 export type ExperienceInput = z.infer<typeof experienceSchema>;
 export type SkillInput = z.infer<typeof skillSchema>;
 export type ContactInput = z.infer<typeof contactSchema>;
 export type NewsletterInput = z.infer<typeof newsletterSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
+export type CreateUserInput = z.infer<typeof createUserSchema>;
+export type UpdateUserInput = z.infer<typeof updateUserSchema>;

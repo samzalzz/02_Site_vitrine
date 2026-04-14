@@ -14,7 +14,7 @@ import { cn } from '@/lib/cn';
 const schema = z.object({
   name: z.string().min(1, 'Required'),
   category: z.string().min(1, 'Required'),
-  level: z.coerce.number().int().min(1).max(5),
+  level: z.string().min(1, 'Required'),
   icon: z.string().optional(),
 });
 type FormData = z.infer<typeof schema>;
@@ -47,15 +47,15 @@ export default function SkillsPage() {
 
   const closeForm = () => { setShowForm(false); setEditItem(null); reset(); };
   const mutOpts = { onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'skills'] }); closeForm(); } };
-  const createM = useMutation({ mutationFn: (d: FormData) => api.admin.create('skills', d), ...mutOpts });
-  const updateM = useMutation({ mutationFn: (d: FormData) => api.admin.update('skills', editItem!.id, d), ...mutOpts });
+  const createM = useMutation({ mutationFn: (d: FormData) => api.admin.create('skills', { ...d, level: parseInt(d.level, 10) }), ...mutOpts });
+  const updateM = useMutation({ mutationFn: (d: FormData) => api.admin.update('skills', editItem!.id, { ...d, level: parseInt(d.level, 10) }), ...mutOpts });
   const deleteM = useMutation({ mutationFn: (id: string) => api.admin.remove('skills', id), onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'skills'] }); setDeleteTarget(null); } });
 
   const handleEdit = (row: Skill) => {
     setEditItem(row); setShowForm(true);
     setValue('name', row.name);
     setValue('category', row.category);
-    setValue('level', row.level);
+    setValue('level', String(row.level));
     setValue('icon', row.icon ?? '');
   };
 

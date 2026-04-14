@@ -16,7 +16,7 @@ const schema = z.object({
   position: z.string().min(1, 'Required'),
   startDate: z.string().min(1, 'Required'),
   endDate: z.string().optional(),
-  current: z.boolean().default(false),
+  current: z.boolean().optional(),
   description: z.string().min(1, 'Required'),
   technologies: z.string().min(1, 'Comma-separated list required'),
 });
@@ -47,7 +47,7 @@ export default function ExperiencesPage() {
   });
 
   const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } =
-    useForm<FormData>({ resolver: zodResolver(schema) });
+    useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { current: false } });
 
   const closeForm = () => { setShowForm(false); setEditItem(null); reset(); };
   const mutOpts = { onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin', 'experiences'] }); closeForm(); } };

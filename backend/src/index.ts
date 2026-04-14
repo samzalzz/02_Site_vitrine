@@ -7,6 +7,7 @@ import skillRoutes from './routes/skills.js';
 import contactRoutes from './routes/contact.js';
 import newsletterRoutes from './routes/newsletter.js';
 import authRoutes from './routes/auth.js';
+import userRoutes from './routes/users.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -38,6 +39,7 @@ app.use('/api/skills', skillRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

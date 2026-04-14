@@ -1,16 +1,11 @@
 import { Router } from 'express';
 import { authController } from '../controllers/authController.js';
+import { loginSchema } from '../utils/validators.js';
 import { authMiddleware } from '../middleware/auth.js';
-import { z } from 'zod';
 
 const router = Router();
 
-const loginSchema = z.object({
-  password: z.string().min(1),
-});
-
-// Public routes
-router.post('/login', async (req, res, next) => {
+router.post('/', async (req, res, next) => {
   try {
     const validated = loginSchema.parse(req.body);
     req.body = validated;
@@ -20,10 +15,9 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
-// Protected routes
 router.get('/me', authMiddleware, async (req, res, next) => {
   try {
-    await authController.getMe(req, res);
+    await authController.me(req, res);
   } catch (error) {
     next(error);
   }

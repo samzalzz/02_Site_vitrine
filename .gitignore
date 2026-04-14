@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+package-lock.json
+yarn.lock
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build
+.next/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.docker/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Misc
+.cache/
+temp/

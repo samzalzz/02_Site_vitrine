@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 export interface AuthRequest extends Request {
   userId?: string;
   role?: string;
+  userEmail?: string;
 }
 
 export function authMiddleware(
@@ -22,6 +23,7 @@ export function authMiddleware(
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
     req.userId = (decoded as any).id;
     req.role = (decoded as any).role;
+    req.userEmail = (decoded as any).email;
     next();
   } catch (error) {
     res.status(401).json({ error: 'Invalid token' });

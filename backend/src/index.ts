@@ -1,6 +1,8 @@
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import projectRoutes from './routes/projects';
+import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
 
@@ -24,6 +26,9 @@ app.get('/api/health', (_req: Request, res: Response) => {
   });
 });
 
+// Routes
+app.use('/api/projects', projectRoutes);
+
 // 404 handler
 app.use((req: Request, res: Response) => {
   res.status(404).json({
@@ -33,13 +38,7 @@ app.use((req: Request, res: Response) => {
 });
 
 // Error handler
-app.use((err: any, _req: Request, res: Response) => {
-  console.error('Error:', err);
-  res.status(err.status || 500).json({
-    error: 'Internal Server Error',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'An error occurred',
-  });
-});
+app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {

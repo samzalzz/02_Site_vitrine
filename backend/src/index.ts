@@ -1,13 +1,13 @@
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import projectRoutes from './routes/projects';
-import experienceRoutes from './routes/experiences';
-import skillRoutes from './routes/skills';
-import contactRoutes from './routes/contact';
-import newsletterRoutes from './routes/newsletter';
-import authRoutes from './routes/auth';
-import { errorHandler } from './middleware/errorHandler';
+import projectRoutes from './routes/projects.js';
+import experienceRoutes from './routes/experiences.js';
+import skillRoutes from './routes/skills.js';
+import contactRoutes from './routes/contact.js';
+import newsletterRoutes from './routes/newsletter.js';
+import authRoutes from './routes/auth.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
 

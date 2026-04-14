@@ -1,6 +1,6 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
-import { AuthRequest } from '../middleware/auth';
-import { AppError } from '../middleware/errorHandler';
+import { AuthRequest } from '../middleware/auth.js';
+import { AppError } from '../middleware/errorHandler.js';
 
 export const authController = {
   async login(req: any, res: any) {

@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { skillController } from '../controllers/skillController';
-import { skillSchema } from '../utils/validators';
-import { authMiddleware, adminOnly } from '../middleware/auth';
+import { skillController } from '../controllers/skillController.js';
+import { skillSchema } from '../utils/validators.js';
+import { authMiddleware, adminOnly } from '../middleware/auth.js';
 
 const router = Router();
 

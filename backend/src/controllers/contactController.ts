@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { ContactInput } from '../utils/validators';
+import { ContactInput } from '../utils/validators.js';
 
 const prisma = new PrismaClient();
 

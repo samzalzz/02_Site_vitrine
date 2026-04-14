@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { newsletterController } from '../controllers/newsletterController';
-import { newsletterSchema } from '../utils/validators';
-import { authMiddleware, adminOnly } from '../middleware/auth';
+import { newsletterController } from '../controllers/newsletterController.js';
+import { newsletterSchema } from '../utils/validators.js';
+import { authMiddleware, adminOnly } from '../middleware/auth.js';
 
 const router = Router();
 

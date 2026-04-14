@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { experienceController } from '../controllers/experienceController';
-import { experienceSchema } from '../utils/validators';
-import { authMiddleware, adminOnly } from '../middleware/auth';
+import { experienceController } from '../controllers/experienceController.js';
+import { experienceSchema } from '../utils/validators.js';
+import { authMiddleware, adminOnly } from '../middleware/auth.js';
 
 const router = Router();
 

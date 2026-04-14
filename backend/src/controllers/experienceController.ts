@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { ExperienceInput } from '../utils/validators';
+import { ExperienceInput } from '../utils/validators.js';
 
 const prisma = new PrismaClient();
 

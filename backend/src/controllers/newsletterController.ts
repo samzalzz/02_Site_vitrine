@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { NewsletterInput } from '../utils/validators';
-import { AppError } from '../middleware/errorHandler';
+import { NewsletterInput } from '../utils/validators.js';
+import { AppError } from '../middleware/errorHandler.js';
 
 const prisma = new PrismaClient();
 

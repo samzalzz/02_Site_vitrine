@@ -1,4 +1,13 @@
+import { auth } from './auth';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+
+function adminHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${auth.getToken()}`,
+  };
+}
 
 interface Project {
   id: string;
@@ -82,6 +91,50 @@ export const api = {
         body: JSON.stringify({ email }),
       });
       if (!res.ok) throw new Error('Failed to subscribe to newsletter');
+    },
+  },
+  admin: {
+    async login(password: string): Promise<{ token: string }> {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      if (!res.ok) throw new Error('Invalid password');
+      return res.json();
+    },
+    async me() {
+      const res = await fetch(`${API_BASE_URL}/auth/me`, { headers: adminHeaders() });
+      if (!res.ok) throw new Error('Unauthenticated');
+      return res.json();
+    },
+    async getAll<T>(resource: string): Promise<T[]> {
+      const res = await fetch(`${API_BASE_URL}/${resource}`, {
+        headers: adminHeaders(),
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error(`Failed to fetch ${resource}`);
+      return res.json();
+    },
+    async create<T>(resource: string, data: unknown): Promise<T> {
+      const res = await fetch(`${API_BASE_URL}/${resource}`, {
+        method: 'POST', headers: adminHeaders(), body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error(`Failed to create ${resource}`);
+      return res.json();
+    },
+    async update<T>(resource: string, id: string, data: unknown): Promise<T> {
+      const res = await fetch(`${API_BASE_URL}/${resource}/${id}`, {
+        method: 'PUT', headers: adminHeaders(), body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error(`Failed to update ${resource}`);
+      return res.json();
+    },
+    async remove(resource: string, id: string): Promise<void> {
+      const res = await fetch(`${API_BASE_URL}/${resource}/${id}`, {
+        method: 'DELETE', headers: adminHeaders(),
+      });
+      if (!res.ok) throw new Error(`Failed to delete from ${resource}`);
     },
   },
 };

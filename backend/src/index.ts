@@ -2,6 +2,11 @@ import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import projectRoutes from './routes/projects';
+import experienceRoutes from './routes/experiences';
+import skillRoutes from './routes/skills';
+import contactRoutes from './routes/contact';
+import newsletterRoutes from './routes/newsletter';
+import authRoutes from './routes/auth';
 import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
@@ -28,6 +33,11 @@ app.get('/api/health', (_req: Request, res: Response) => {
 
 // Routes
 app.use('/api/projects', projectRoutes);
+app.use('/api/experiences', experienceRoutes);
+app.use('/api/skills', skillRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/auth', authRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

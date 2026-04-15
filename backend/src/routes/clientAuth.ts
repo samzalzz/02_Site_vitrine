@@ -47,8 +47,14 @@ router.post('/password-reset/confirm', async (req, res, next) => {
 router.get('/files/:fileName', authMiddleware, async (req, res, next) => {
   try {
     const { fileName } = req.params;
-    const { fileHandler } = await import('../utils/fileHandler.js');
 
+    // Prevent path traversal - only allow generated filenames (hex + extension)
+    if (fileName.includes('..') || fileName.includes('/') || fileName.includes('\\')) {
+      res.status(400).json({ error: 'Invalid file name' });
+      return;
+    }
+
+    const { fileHandler } = await import('../utils/fileHandler.js');
     const filePath = fileHandler.getFilePath(fileName);
     res.download(filePath, fileName);
   } catch (error) {

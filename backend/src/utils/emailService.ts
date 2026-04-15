@@ -33,7 +33,7 @@ export const emailService = {
       subject: 'Reset Your Password',
       html: `
         <h2>Password Reset Request</h2>
-        <p>Hi ${clientName},</p>
+        <p>Hi ${escapeHtml(clientName)},</p>
         <p>You requested to reset your password. Click the link below to proceed:</p>
         <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px;">Reset Password</a>
         <p>This link expires in 24 hours.</p>
@@ -46,11 +46,11 @@ export const emailService = {
     await transporter.sendMail({
       from: process.env.SMTP_FROM || 'noreply@portfolio.local',
       to: recipientEmail,
-      subject: `New message from ${senderName} - ${projectTitle}`,
+      subject: `New message from ${escapeHtml(senderName)} - ${escapeHtml(projectTitle)}`,
       html: `
         <h2>New Message</h2>
-        <p>Hi ${recipientName},</p>
-        <p><strong>${senderName}</strong> sent you a message in project <strong>${projectTitle}</strong>:</p>
+        <p>Hi ${escapeHtml(recipientName)},</p>
+        <p><strong>${escapeHtml(senderName)}</strong> sent you a message in project <strong>${escapeHtml(projectTitle)}</strong>:</p>
         <blockquote style="border-left: 4px solid #3b82f6; padding-left: 10px; margin: 10px 0; color: #666;">
           ${escapeHtml(messagePreview)}
         </blockquote>

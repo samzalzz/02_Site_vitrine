@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../middleware/auth.js';
+import { ZodError } from 'zod';
 import { clientLoginSchema, clientResetPasswordSchema, requestPasswordResetSchema } from '../utils/validators.js';
 
 const prisma = new PrismaClient();
@@ -45,7 +46,7 @@ export const clientAuthController = {
         },
       });
     } catch (error) {
-      if (error instanceof Error && error.name === 'ZodError') {
+      if (error instanceof ZodError) {
         res.status(400).json({ error: 'Invalid request' });
       } else {
         res.status(500).json({ error: 'Internal server error' });
@@ -72,7 +73,7 @@ export const clientAuthController = {
 
       res.json(client);
     } catch (error) {
-      if (error instanceof Error && error.name === 'ZodError') {
+      if (error instanceof ZodError) {
         res.status(400).json({ error: 'Invalid request' });
       } else {
         res.status(500).json({ error: 'Internal server error' });
@@ -104,7 +105,7 @@ export const clientAuthController = {
 
       res.status(200).json({ message: 'If email exists, reset link will be sent' });
     } catch (error) {
-      if (error instanceof Error && error.name === 'ZodError') {
+      if (error instanceof ZodError) {
         res.status(400).json({ error: 'Invalid request' });
       } else {
         res.status(500).json({ error: 'Internal server error' });
@@ -114,8 +115,7 @@ export const clientAuthController = {
 
   async resetPassword(req: Request, res: Response, next?: any): Promise<void> {
     try {
-      const { newPassword } = clientResetPasswordSchema.parse(req.body);
-      const { token } = req.body;
+      const { token, newPassword } = clientResetPasswordSchema.parse(req.body);
 
       const reset = await prisma.passwordReset.findUnique({ where: { token } });
       if (!reset || new Date() > reset.expiresAt) {
@@ -134,7 +134,7 @@ export const clientAuthController = {
 
       res.json({ message: 'Password reset successful' });
     } catch (error) {
-      if (error instanceof Error && error.name === 'ZodError') {
+      if (error instanceof ZodError) {
         res.status(400).json({ error: 'Invalid request' });
       } else {
         res.status(500).json({ error: 'Internal server error' });

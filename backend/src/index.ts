@@ -1,6 +1,7 @@
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import http from 'http';
 import projectRoutes from './routes/projects.js';
 import experienceRoutes from './routes/experiences.js';
 import skillRoutes from './routes/skills.js';
@@ -8,7 +9,11 @@ import contactRoutes from './routes/contact.js';
 import newsletterRoutes from './routes/newsletter.js';
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
+import clientAuthRoutes from './routes/clientAuth.js';
+import clientRoutes from './routes/clients.js';
+import clientProjectRoutes from './routes/clientProjects.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { initializeSocket } from './socket/socketHandler.js';
 
 dotenv.config();
 
@@ -40,6 +45,9 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/client-auth', clientAuthRoutes);
+app.use('/api/clients', clientRoutes);
+app.use('/api/client-projects', clientProjectRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {
@@ -52,8 +60,12 @@ app.use((req: Request, res: Response) => {
 // Error handler
 app.use(errorHandler);
 
+// Create HTTP server with Socket.io
+const httpServer = http.createServer(app);
+initializeSocket(httpServer);
+
 // Start server
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`
 ╔════════════════════════════════════╗
 ║  Portfolio Backend Server Started  ║

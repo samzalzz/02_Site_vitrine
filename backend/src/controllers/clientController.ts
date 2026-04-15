@@ -107,6 +107,36 @@ export const clientController = {
     }
   },
 
+  async getById(req: AuthRequest, res: Response): Promise<void> {
+    const { id } = req.params;
+
+    try {
+      const client = await prisma.client.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          company: true,
+          phone: true,
+          status: true,
+          canLogin: true,
+          createdAt: true,
+          _count: { select: { projects: true } },
+        },
+      });
+
+      if (!client) {
+        res.status(404).json({ error: 'Client not found' });
+        return;
+      }
+
+      res.json(client);
+    } catch (error) {
+      throw error; // Let route's next(error) handle it
+    }
+  },
+
   async getProjects(req: AuthRequest, res: Response): Promise<void> {
     const { id } = req.params;
 

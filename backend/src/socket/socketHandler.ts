@@ -93,10 +93,52 @@ export function initializeSocket(httpServer: Server) {
           createdAt: message.createdAt,
         });
 
-        // TODO: Send email notification to other participants (Task 7)
+        // Send email notification
+        try {
+          const { emailService } = await import('../utils/emailService.js');
+          const project = await prisma.clientProject.findUnique({
+            where: { id: projectId },
+            include: { client: true },
+          });
+
+          if (project && project.client && data.userType === 'admin') {
+            // Admin sent message to client
+            await emailService.sendMessageNotificationEmail(
+              project.client.email,
+              project.client.name,
+              data.userName,
+              project.title,
+              content.substring(0, 100)
+            );
+          }
+        } catch (emailError) {
+          console.error('Failed to send notification email:', emailError);
+        }
       } catch (error) {
         console.error('Error sending message:', error);
         socket.emit('error', { message: 'Failed to send message' });
+      }
+    });
+
+    // Handle file upload
+    socket.on('file:upload', async (uploadData: { projectId: string; file: Buffer; fileName: string; fileType: string; fileSize: number }) => {
+      try {
+        const { fileHandler } = await import('../utils/fileHandler.js');
+        const { file, fileName, fileType, fileSize } = uploadData;
+
+        // Save file
+        const { fileUrl } = fileHandler.saveFile(file, fileName);
+
+        // Return file info to client
+        socket.emit('file:uploaded', {
+          fileName,
+          fileUrl,
+          fileType,
+          fileSize,
+        });
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        socket.emit('error', { message: 'File upload failed' });
       }
     });
 

@@ -56,6 +56,62 @@ export const updateUserSchema = z.object({
   role: z.enum(['admin']).optional(),
 });
 
+// Client authentication schemas
+export const clientLoginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+export const clientResetPasswordSchema = z.object({
+  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
+export const requestPasswordResetSchema = z.object({
+  email: z.string().email('Invalid email address'),
+});
+
+// Client management schemas (admin operations)
+export const createClientSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  name: z.string().min(1, 'Name is required'),
+  company: z.string().optional(),
+  phone: z.string().optional(),
+  canLogin: z.boolean().default(false),
+});
+
+export const updateClientSchema = z.object({
+  name: z.string().min(1).optional(),
+  company: z.string().optional(),
+  phone: z.string().optional(),
+  status: z.enum(['active', 'inactive', 'prospect']).optional(),
+  canLogin: z.boolean().optional(),
+});
+
+// Project / opportunity schemas
+export const createProjectSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().min(1, 'Description is required'),
+  clientId: z.string().min(1, 'Client is required'),
+  budget: z.coerce.number().optional(),
+  timeline: z.string().optional(),
+  status: z.enum(['prospect', 'active', 'completed', 'on-hold']).default('prospect'),
+});
+
+export const updateProjectSchema = z.object({
+  title: z.string().min(1).optional(),
+  description: z.string().min(1).optional(),
+  budget: z.coerce.number().optional(),
+  timeline: z.string().optional(),
+  status: z.enum(['prospect', 'active', 'completed', 'on-hold']).optional(),
+  clientId: z.string().optional(),
+});
+
+// Chat message schema
+export const sendMessageSchema = z.object({
+  content: z.string().min(1, 'Message cannot be empty').max(5000),
+  projectId: z.string().min(1),
+});
+
 // Export TypeScript types
 export type ProjectInput = z.infer<typeof projectSchema>;
 export type ExperienceInput = z.infer<typeof experienceSchema>;
@@ -65,3 +121,11 @@ export type NewsletterInput = z.infer<typeof newsletterSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
+export type ClientLoginInput = z.infer<typeof clientLoginSchema>;
+export type ClientResetPasswordInput = z.infer<typeof clientResetPasswordSchema>;
+export type RequestPasswordResetInput = z.infer<typeof requestPasswordResetSchema>;
+export type CreateClientInput = z.infer<typeof createClientSchema>;
+export type UpdateClientInput = z.infer<typeof updateClientSchema>;
+export type CreateProjectInput = z.infer<typeof createProjectSchema>;
+export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
+export type SendMessageInput = z.infer<typeof sendMessageSchema>;

@@ -81,3 +81,78 @@ model AdminUser {
 
   @@map("admin_users")
 }
+
+model Client {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  passwordHash   String?
+  name           String
+  company        String?
+  phone          String?
+  status         String          @default("active")
+  canLogin       Boolean         @default(false)
+  projects       ClientProject[]
+  messages       Message[]
+  passwordResets PasswordReset[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@map("clients")
+}
+
+model ClientProject {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  budget      Float?
+  timeline    String?
+  status      String    @default("prospect")
+  clientId    String
+  client      Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  messages    Message[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("client_projects")
+}
+
+model Message {
+  id          String           @id @default(cuid())
+  content     String
+  senderId    String
+  senderType  String
+  senderName  String
+  projectId   String
+  project     ClientProject    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  clientId    String?
+  client      Client?          @relation(fields: [clientId], references: [id])
+  attachments FileAttachment[]
+  createdAt   DateTime         @default(now())
+
+  @@map("messages")
+}
+
+model FileAttachment {
+  id           String   @id @default(cuid())
+  messageId    String
+  message      Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  fileName     String
+  originalName String
+  fileType     String
+  fileSize     Int
+  fileUrl      String
+  uploadedAt   DateTime @default(now())
+
+  @@map("file_attachments")
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("password_resets")
+}

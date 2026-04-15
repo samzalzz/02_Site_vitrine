@@ -46,6 +46,37 @@ interface NewsletterData {
   email: string;
 }
 
+interface ClientUser {
+  id: string;
+  email: string;
+  name: string;
+  company?: string;
+}
+
+interface ClientAttachment {
+  id: string;
+  fileName: string;
+  originalName: string;
+  fileUrl: string;
+}
+
+interface ClientMessage {
+  id: string;
+  content: string;
+  senderType: string;
+  senderName: string;
+  createdAt: string;
+  attachments: ClientAttachment[];
+}
+
+interface ClientProject {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  messages: ClientMessage[];
+}
+
 export const api = {
   projects: {
     async getAll(): Promise<Project[]> {
@@ -94,7 +125,7 @@ export const api = {
     },
   },
   client: {
-    async login(email: string, password: string): Promise<{ token: string; client: any }> {
+    async login(email: string, password: string): Promise<{ token: string; client: ClientUser }> {
       const res = await fetch(`${API_BASE_URL}/client-auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -103,21 +134,21 @@ export const api = {
       if (!res.ok) throw new Error('Invalid email or password');
       return res.json();
     },
-    async me(token: string): Promise<any> {
+    async me(token: string): Promise<ClientUser> {
       const res = await fetch(`${API_BASE_URL}/client-auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Unauthenticated');
       return res.json();
     },
-    async getProjects(token: string): Promise<any[]> {
+    async getProjects(token: string): Promise<ClientProject[]> {
       const res = await fetch(`${API_BASE_URL}/clients/me/projects`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('Failed to fetch projects');
       return res.json();
     },
-    async getProjectById(token: string, id: string): Promise<any> {
+    async getProjectById(token: string, id: string): Promise<ClientProject> {
       const res = await fetch(`${API_BASE_URL}/clients/me/projects/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });

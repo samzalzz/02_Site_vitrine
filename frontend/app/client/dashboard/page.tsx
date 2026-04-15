@@ -18,6 +18,8 @@ export default function ClientDashboard() {
   const router = useRouter();
   const [projects, setProjects] = useState<ClientProject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isChecked, setIsChecked] = useState(false);
 
   useEffect(() => {
     const token = clientAuth.getToken();
@@ -26,14 +28,37 @@ export default function ClientDashboard() {
       return;
     }
 
-    api.client.getProjects(token).then(setProjects).catch(() => router.push('/client/login')).finally(() => setIsLoading(false));
+    setIsChecked(true);
+
+    api.client.getProjects(token)
+      .then(setProjects)
+      .catch((err) => {
+        // Only redirect on 401 Unauthorized
+        if (err.message?.includes('401') || err.message?.includes('Unauthenticated')) {
+          router.push('/client/login');
+        } else {
+          // Display other errors (network, server errors)
+          setError('Failed to load projects. Please try again later.');
+        }
+      })
+      .finally(() => setIsLoading(false));
   }, [router]);
+
+  // Don't render if unauthenticated until auth check is complete
+  if (!isChecked) return null;
 
   if (isLoading) return <div className="text-neutral-500">Loading...</div>;
 
   return (
     <div>
       <h1 className="text-3xl font-bold text-neutral-900 mb-6">Your Projects</h1>
+
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-700" role="alert">{error}</p>
+        </div>
+      )}
+
       {projects.length === 0 ? (
         <p className="text-neutral-600">No projects assigned yet.</p>
       ) : (

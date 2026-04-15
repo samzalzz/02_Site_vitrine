@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { clientAuth } from '@/lib/clientAuth';
 import { api } from '@/lib/api';
@@ -55,13 +56,23 @@ export default function ClientProjectPage({ params }: { params: { id: string } }
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [socketError, setSocketError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { register, handleSubmit, reset, formState: { isSubmitting } } = useForm<MessageData>();
+  const { register, handleSubmit, reset, formState: { isSubmitting, errors } } = useForm<MessageData>({
+    resolver: zodResolver(messageSchema),
+  });
 
   useEffect(() => {
     const token = clientAuth.getToken();
     if (!token) {
       router.push('/client/login');
+      return;
+    }
+
+    // Validate project ID format (basic UUID check)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      router.push('/client/dashboard');
       return;
     }
 
@@ -80,11 +91,21 @@ export default function ClientProjectPage({ params }: { params: { id: string } }
 
     socket.on('connect', () => {
       setIsConnected(true);
+      setSocketError(null);
       socket.emit('join:project', id);
     });
 
     socket.on('message:receive', (message: Message) => {
       setMessages((prev) => [...prev, message]);
+    });
+
+    socket.on('error', (error: any) => {
+      setSocketError(`Socket error: ${error.message || 'Unknown error'}`);
+      setIsConnected(false);
+    });
+
+    socket.on('message:error', (error: any) => {
+      setSocketError(`Message error: ${error.message || 'Failed to send message'}`);
     });
 
     socket.on('disconnect', () => {
@@ -108,12 +129,29 @@ export default function ClientProjectPage({ params }: { params: { id: string } }
     socketRef.current.emit('message:send', {
       projectId: id,
       content: data.content,
+    }, (response: any) => {
+      if (response?.success) {
+        reset();
+        setSocketError(null);
+      } else {
+        setSocketError(response?.error || 'Failed to send message');
+      }
     });
-
-    reset();
   };
 
   if (!project) return <div className="text-neutral-500">Loading...</div>;
+
+  // Validate file URL is from own domain
+  const isValidFileUrl = (url: string): boolean => {
+    try {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+      const apiUrl = new URL(apiBaseUrl);
+      const fileUrl = new URL(url, apiUrl.origin);
+      return fileUrl.hostname === apiUrl.hostname;
+    } catch {
+      return false;
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -130,8 +168,18 @@ export default function ClientProjectPage({ params }: { params: { id: string } }
       <Card className="flex flex-col h-96">
         <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
           <h2 className="font-semibold text-neutral-900">Messages</h2>
-          <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+          <span
+            className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}
+            role="status"
+            aria-label={isConnected ? 'Connected' : 'Disconnected'}
+          />
         </div>
+
+        {socketError && (
+          <div className="px-6 py-3 bg-red-50 border-b border-red-200">
+            <p className="text-sm text-red-700" role="alert">{socketError}</p>
+          </div>
+        )}
 
         <div className="px-6 py-4 flex-1 overflow-y-auto space-y-4">
           {messages.map((msg) => (
@@ -145,17 +193,23 @@ export default function ClientProjectPage({ params }: { params: { id: string } }
                 <p>{msg.content}</p>
                 {msg.attachments && msg.attachments.length > 0 && (
                   <div className="mt-2 space-y-1">
-                    {msg.attachments.map((attachment) => (
-                      <a
-                        key={attachment.id}
-                        href={attachment.fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block text-xs underline opacity-70 hover:opacity-100"
-                      >
-                        📎 {attachment.originalName}
-                      </a>
-                    ))}
+                    {msg.attachments.map((attachment) => {
+                      // Skip rendering untrusted file URLs
+                      if (!isValidFileUrl(attachment.fileUrl)) {
+                        return null;
+                      }
+                      return (
+                        <a
+                          key={attachment.id}
+                          href={attachment.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block text-xs underline opacity-70 hover:opacity-100"
+                        >
+                          📎 {attachment.originalName}
+                        </a>
+                      );
+                    })}
                   </div>
                 )}
                 <div className="text-xs opacity-70 mt-1">{new Date(msg.createdAt).toLocaleString()}</div>
@@ -166,12 +220,20 @@ export default function ClientProjectPage({ params }: { params: { id: string } }
         </div>
 
         <div className="px-6 py-4 border-t border-neutral-200">
-          <form onSubmit={handleSubmit(onSubmit)} className="flex gap-2">
-            <input
-              {...register('content')}
-              placeholder="Type a message..."
-              className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
+            <div>
+              <input
+                {...register('content')}
+                placeholder="Type a message..."
+                aria-invalid={!!errors.content}
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+              {errors.content && (
+                <p className="mt-1 text-sm text-red-600" role="alert">
+                  {errors.content.message}
+                </p>
+              )}
+            </div>
             <Button type="submit" variant="primary" disabled={isSubmitting || !isConnected}>
               Send
             </Button>

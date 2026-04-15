@@ -66,10 +66,25 @@ export function initializeSocket(httpServer: Server) {
     });
 
     // Message handling
-    socket.on('message:send', async (messageData: { projectId: string; content: string }) => {
+    socket.on('message:send', async (messageData: { projectId: string; content: string }, callback?: (response: any) => void) => {
       const { projectId, content } = messageData;
 
       try {
+        // Verify authorization: for clients, check they own the project
+        if (data.userType === 'client') {
+          const project = await prisma.clientProject.findUnique({
+            where: { id: projectId },
+            select: { clientId: true },
+          });
+
+          if (!project || project.clientId !== data.userId) {
+            const errorMsg = 'Unauthorized: you do not have access to this project';
+            socket.emit('message:error', { message: errorMsg });
+            callback?.({ success: false, error: errorMsg });
+            return;
+          }
+        }
+
         // Determine sender ID based on user type
         const adminId = data.userType === 'admin' ? data.userId : undefined;
         const clientId = data.userType === 'client' ? data.userId : undefined;
@@ -92,6 +107,9 @@ export function initializeSocket(httpServer: Server) {
           senderName: message.senderName,
           createdAt: message.createdAt,
         });
+
+        // Send acknowledgment back to sender
+        callback?.({ success: true });
 
         // Send email notification
         try {
@@ -117,7 +135,9 @@ export function initializeSocket(httpServer: Server) {
         }
       } catch (error) {
         console.error('Error sending message:', error);
-        socket.emit('error', { message: 'Failed to send message' });
+        const errorMsg = 'Failed to send message';
+        socket.emit('message:error', { message: errorMsg });
+        callback?.({ success: false, error: errorMsg });
       }
     });
 

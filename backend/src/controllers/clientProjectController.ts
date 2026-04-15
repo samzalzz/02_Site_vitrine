@@ -66,30 +66,46 @@ export const clientProjectController = {
   },
 
   async update(req: AuthRequest, res: Response): Promise<void> {
-    const { id } = req.params;
-    const { title, description, budget, timeline, status, clientId } = req.body;
+    try {
+      const { id } = req.params;
+      const { title, description, budget, timeline, status, clientId } = req.body;
 
-    const project = await prisma.clientProject.update({
-      where: { id },
-      data: {
-        ...(title && { title }),
-        ...(description && { description }),
-        ...(budget !== undefined && { budget }),
-        ...(timeline && { timeline }),
-        ...(status && { status }),
-        ...(clientId && { clientId }),
-      },
-      include: {
-        client: { select: { id: true, name: true, email: true } },
-      },
-    });
+      const project = await prisma.clientProject.update({
+        where: { id },
+        data: {
+          ...(title !== undefined && { title }),
+          ...(description !== undefined && { description }),
+          ...(budget !== undefined && { budget }),
+          ...(timeline !== undefined && { timeline }),
+          ...(status && { status }),
+          ...(clientId && { clientId }),
+        },
+        include: {
+          client: { select: { id: true, name: true, email: true } },
+        },
+      });
 
-    res.json(project);
+      res.json(project);
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        res.status(404).json({ error: 'Project not found' });
+      } else {
+        throw error;
+      }
+    }
   },
 
   async delete(req: AuthRequest, res: Response): Promise<void> {
-    const { id } = req.params;
-    await prisma.clientProject.delete({ where: { id } });
-    res.status(204).send();
+    try {
+      const { id } = req.params;
+      await prisma.clientProject.delete({ where: { id } });
+      res.status(204).send();
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        res.status(404).json({ error: 'Project not found' });
+      } else {
+        throw error;
+      }
+    }
   },
 };

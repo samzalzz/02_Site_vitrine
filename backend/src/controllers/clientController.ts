@@ -39,7 +39,7 @@ export const clientController = {
         company: company || null,
         phone: phone || null,
         status: status || 'active',
-        canLogin,
+        canLogin: typeof canLogin === 'boolean' ? canLogin : false,
         passwordHash: null, // Will be set on first login or password reset
       },
       select: {

@@ -55,7 +55,7 @@ export const clientProjectController = {
         clientId,
         budget,
         timeline,
-        status: status || 'prospect',
+        status: status ?? 'prospect',
       },
       include: {
         client: { select: { id: true, name: true, email: true } },

@@ -71,25 +71,26 @@ model NewsletterSubscriber {
 }
 
 model AdminUser {
-  id           String   @id @default(cuid())
-  email        String   @unique @db.VarChar(255)
-  passwordHash String   @db.Text
-  name         String   @db.VarChar(255)
-  role         String   @default("admin") @db.VarChar(50)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id           String    @id @default(cuid())
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @db.Text
+  name         String    @db.VarChar(255)
+  role         String    @default("admin") @db.VarChar(50)
+  messages     Message[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@map("admin_users")
 }
 
 model Client {
   id             String          @id @default(cuid())
-  email          String          @unique
+  email          String          @unique @db.VarChar(255)
   passwordHash   String?
-  name           String
-  company        String?
-  phone          String?
-  status         String          @default("active")
+  name           String          @db.VarChar(255)
+  company        String?         @db.VarChar(255)
+  phone          String?         @db.VarChar(50)
+  status         String          @default("active") @db.VarChar(50)
   canLogin       Boolean         @default(false)
   projects       ClientProject[]
   messages       Message[]
@@ -102,33 +103,38 @@ model Client {
 
 model ClientProject {
   id          String    @id @default(cuid())
-  title       String
-  description String
+  title       String    @db.VarChar(500)
+  description String    @db.Text
   budget      Float?
-  timeline    String?
-  status      String    @default("prospect")
+  timeline    String?   @db.VarChar(100)
+  status      String    @default("prospect") @db.VarChar(50)
   clientId    String
   client      Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
   messages    Message[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  @@index([clientId])
   @@map("client_projects")
 }
 
 model Message {
   id          String           @id @default(cuid())
-  content     String
-  senderId    String
-  senderType  String
-  senderName  String
+  content     String           @db.Text
   projectId   String
   project     ClientProject    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  adminId     String?
+  admin       AdminUser?       @relation(fields: [adminId], references: [id], onDelete: SetNull)
   clientId    String?
-  client      Client?          @relation(fields: [clientId], references: [id])
+  client      Client?          @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  senderType  String           @db.VarChar(20)
+  senderName  String           @db.VarChar(255)
   attachments FileAttachment[]
   createdAt   DateTime         @default(now())
 
+  @@index([projectId])
+  @@index([clientId])
+  @@index([adminId])
   @@map("messages")
 }
 
@@ -136,11 +142,11 @@ model FileAttachment {
   id           String   @id @default(cuid())
   messageId    String
   message      Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  fileName     String
-  originalName String
-  fileType     String
+  fileName     String   @db.VarChar(500)
+  originalName String   @db.VarChar(500)
+  fileType     String   @db.VarChar(100)
   fileSize     Int
-  fileUrl      String
+  fileUrl      String   @db.VarChar(500)
   uploadedAt   DateTime @default(now())
 
   @@map("file_attachments")
@@ -150,7 +156,7 @@ model PasswordReset {
   id        String   @id @default(cuid())
   clientId  String
   client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  token     String   @unique
+  token     String   @unique @db.VarChar(64)
   expiresAt DateTime
   createdAt DateTime @default(now())
 

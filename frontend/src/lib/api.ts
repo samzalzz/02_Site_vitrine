@@ -184,5 +184,53 @@ export const api = {
       if (!res.ok) throw new Error(await res.json().then(d => d.error ?? 'Failed'));
       return res.json();
     },
+    async getProjects() {
+      return this.getAll<{
+        id: string;
+        title: string;
+        description: string;
+        budget?: number;
+        timeline?: string;
+        status: string;
+        clientId: string;
+        client: { id: string; name: string; email: string; company?: string };
+        _count: { messages: number };
+        createdAt: string;
+      }>('client-projects');
+    },
+    async getProjectById(id: string) {
+      const res = await fetch(`${API_BASE_URL}/client-projects/${id}`, {
+        headers: adminHeaders(),
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error('Failed to fetch project');
+      return res.json() as Promise<{
+        id: string;
+        title: string;
+        description: string;
+        budget?: number;
+        timeline?: string;
+        status: string;
+        clientId: string;
+        client: { id: string; name: string; email: string; company?: string };
+        messages: {
+          id: string;
+          content: string;
+          senderType: string;
+          senderName: string;
+          createdAt: string;
+          attachments: { id: string; fileName: string; originalName: string; fileUrl: string }[];
+        }[];
+      }>;
+    },
+    async createProject(data: { title: string; description: string; clientId: string; budget?: number; timeline?: string; status?: string }) {
+      return this.create<{ id: string; title: string; description: string; clientId: string; status: string; createdAt: string }>('client-projects', data);
+    },
+    async updateProject(id: string, data: { title?: string; description?: string; budget?: number; timeline?: string; status?: string; clientId?: string }) {
+      return this.update<{ id: string; title: string; description: string; status: string }>('client-projects', id, data);
+    },
+    async deleteProject(id: string) {
+      return this.remove('client-projects', id);
+    },
   },
 };

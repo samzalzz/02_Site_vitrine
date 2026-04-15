@@ -6,7 +6,8 @@ import { cn } from '@/lib/cn';
 
 const NAV = [
   { href: '/admin', label: 'Dashboard' },
-  { href: '/admin/projects', label: 'Projects' },
+  { href: '/admin/projects', label: 'Portfolio Projects' },
+  { href: '/admin/client-projects', label: 'Client Projects' },
   { href: '/admin/experiences', label: 'Experiences' },
   { href: '/admin/skills', label: 'Skills' },
   { href: '/admin/contact', label: 'Contact' },

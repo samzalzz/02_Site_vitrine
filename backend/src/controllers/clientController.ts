@@ -39,7 +39,7 @@ export const clientController = {
         company: company || null,
         phone: phone || null,
         status: status || 'active',
-        canLogin: typeof canLogin === 'boolean' ? canLogin : false,
+        canLogin,
         passwordHash: null, // Will be set on first login or password reset
       },
       select: {
@@ -69,7 +69,7 @@ export const clientController = {
           ...(company !== undefined && { company }),
           ...(phone !== undefined && { phone }),
           ...(status && { status }),
-          ...(canLogin !== undefined && { canLogin }),
+          ...(typeof canLogin === 'boolean' && { canLogin }),
         },
         select: {
           id: true,
@@ -108,34 +108,30 @@ export const clientController = {
   },
 
   async getProjects(req: AuthRequest, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
+    const { id } = req.params;
 
-      // Verify client exists
-      const client = await prisma.client.findUnique({ where: { id } });
-      if (!client) {
-        res.status(404).json({ error: 'Client not found' });
-        return;
-      }
-
-      const projects = await prisma.clientProject.findMany({
-        where: { clientId: id },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          budget: true,
-          timeline: true,
-          status: true,
-          createdAt: true,
-          _count: { select: { messages: true } },
-        },
-        orderBy: { createdAt: 'desc' },
-      });
-
-      res.json(projects);
-    } catch (error) {
-      throw error;
+    // Verify client exists
+    const client = await prisma.client.findUnique({ where: { id } });
+    if (!client) {
+      res.status(404).json({ error: 'Client not found' });
+      return;
     }
+
+    const projects = await prisma.clientProject.findMany({
+      where: { clientId: id },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        budget: true,
+        timeline: true,
+        status: true,
+        createdAt: true,
+        _count: { select: { messages: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    res.json(projects);
   },
 };

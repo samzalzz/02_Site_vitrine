@@ -53,8 +53,8 @@ export const clientProjectController = {
         title,
         description,
         clientId,
-        budget: budget || null,
-        timeline: timeline || null,
+        budget,
+        timeline,
         status: status || 'prospect',
       },
       include: {

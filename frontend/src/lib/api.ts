@@ -93,6 +93,31 @@ export const api = {
       if (!res.ok) throw new Error('Failed to subscribe to newsletter');
     },
   },
+  client: {
+    async login(email: string, password: string): Promise<{ token: string; client: any }> {
+      const res = await fetch(`${API_BASE_URL}/client-auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) throw new Error('Invalid email or password');
+      return res.json();
+    },
+    async me(token: string): Promise<any> {
+      const res = await fetch(`${API_BASE_URL}/client-auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Unauthenticated');
+      return res.json();
+    },
+    async getProjects(token: string): Promise<any[]> {
+      const res = await fetch(`${API_BASE_URL}/clients/me/projects`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Failed to fetch projects');
+      return res.json();
+    },
+  },
   admin: {
     async login(email: string, password: string): Promise<{ token: string }> {
       const res = await fetch(`${API_BASE_URL}/auth`, {

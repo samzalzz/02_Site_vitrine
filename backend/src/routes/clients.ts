@@ -2,10 +2,40 @@ import { Router } from 'express';
 import { clientController } from '../controllers/clientController.js';
 import { createClientSchema, updateClientSchema } from '../utils/validators.js';
 import { authMiddleware, adminOnly } from '../middleware/auth.js';
+import { PrismaClient } from '@prisma/client';
 
 const router = Router();
+const prisma = new PrismaClient();
 
-// All client management routes require admin auth
+// Client routes that require authentication but not admin
+router.get('/me/projects', authMiddleware, async (req, res, next) => {
+  try {
+    if ((req as any).userType !== 'client') {
+      res.status(403).json({ error: 'Not a client' });
+      return;
+    }
+    const projects = await prisma.clientProject.findMany({
+      where: { clientId: (req as any).userId },
+      include: {
+        messages: {
+          select: {
+            id: true,
+            content: true,
+            senderType: true,
+            senderName: true,
+            createdAt: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+    res.json(projects);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// All admin client management routes require admin auth
 router.use(authMiddleware, adminOnly);
 
 router.get('/', async (req, res, next) => {

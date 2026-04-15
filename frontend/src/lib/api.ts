@@ -94,13 +94,31 @@ export const api = {
     },
   },
   admin: {
-    async login(password: string): Promise<{ token: string }> {
-      const res = await fetch(`${API_BASE_URL}/auth/login`, {
+    async login(email: string, password: string): Promise<{ token: string }> {
+      const res = await fetch(`${API_BASE_URL}/auth`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ email, password }),
       });
-      if (!res.ok) throw new Error('Invalid password');
+      if (!res.ok) throw new Error('Invalid email or password');
+      return res.json();
+    },
+    async getUsers() {
+      return this.getAll<{ id: string; email: string; name: string; role: string; createdAt: string }>('users');
+    },
+    async createUser(data: { email: string; password: string; name: string }) {
+      return this.create<{ id: string; email: string; name: string; role: string }>('users', data);
+    },
+    async deleteUser(id: string) {
+      return this.remove('users', id);
+    },
+    async changePassword(id: string, currentPassword: string, newPassword: string) {
+      const res = await fetch(`${API_BASE_URL}/users/${id}/password`, {
+        method: 'PUT',
+        headers: adminHeaders(),
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      if (!res.ok) throw new Error(await res.json().then((d: any) => d.error ?? 'Failed'));
       return res.json();
     },
     async me() {
@@ -135,6 +153,36 @@ export const api = {
         method: 'DELETE', headers: adminHeaders(),
       });
       if (!res.ok) throw new Error(`Failed to delete from ${resource}`);
+    },
+    async getClients() {
+      return this.getAll<{
+        id: string;
+        email: string;
+        name: string;
+        company?: string;
+        phone?: string;
+        status: string;
+        canLogin: boolean;
+        createdAt: string;
+        _count: { projects: number };
+      }>('clients');
+    },
+    async createClient(data: { email: string; name: string; company?: string; phone?: string; canLogin?: boolean }) {
+      return this.create<{ id: string; email: string; name: string; company?: string; phone?: string; status: string; canLogin: boolean; createdAt: string }>('clients', data);
+    },
+    async updateClient(id: string, data: { name?: string; company?: string; phone?: string; status?: string; canLogin?: boolean }) {
+      return this.update<{ id: string; email: string; name: string; company?: string; phone?: string; status: string; canLogin: boolean }>('clients', id, data);
+    },
+    async deleteClient(id: string) {
+      return this.remove('clients', id);
+    },
+    async sendPasswordReset(clientId: string) {
+      const res = await fetch(`${API_BASE_URL}/clients/${clientId}/send-password-reset`, {
+        method: 'POST',
+        headers: adminHeaders(),
+      });
+      if (!res.ok) throw new Error(await res.json().then(d => d.error ?? 'Failed'));
+      return res.json();
     },
   },
 };

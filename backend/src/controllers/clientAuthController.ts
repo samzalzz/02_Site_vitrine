@@ -81,8 +81,13 @@ export const clientAuthController = {
       data: { clientId: client.id, token, expiresAt },
     });
 
-    // TODO: Send email with reset link
-    // Link format: https://yourdomain.com/client/reset-password?token={token}
+    // Send email with reset link
+    try {
+      const { emailService } = await import('../utils/emailService.js');
+      await emailService.sendPasswordResetEmail(client.email, client.name, token);
+    } catch (emailError) {
+      console.error('Failed to send password reset email:', emailError);
+    }
 
     res.status(200).json({ message: 'If email exists, reset link will be sent' });
   },

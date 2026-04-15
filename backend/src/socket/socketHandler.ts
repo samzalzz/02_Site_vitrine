@@ -124,10 +124,24 @@ export function initializeSocket(httpServer: Server) {
     // Handle file upload
     socket.on('file:upload', async (uploadData: { projectId: string; file: Buffer; fileName: string; fileType: string; fileSize: number }) => {
       try {
-        const { fileHandler } = await import('../utils/fileHandler.js');
+        const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'text/plain'];
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
         const { file, fileName, fileType, fileSize } = uploadData;
 
-        // Save file
+        // Validate file type
+        if (!ALLOWED_TYPES.includes(fileType)) {
+          socket.emit('error', { message: 'Invalid file type' });
+          return;
+        }
+
+        // Validate file size
+        if (fileSize > MAX_FILE_SIZE) {
+          socket.emit('error', { message: 'File exceeds 10MB limit' });
+          return;
+        }
+
+        const { fileHandler } = await import('../utils/fileHandler.js');
         const { fileUrl } = fileHandler.saveFile(file, fileName);
 
         // Return file info to client

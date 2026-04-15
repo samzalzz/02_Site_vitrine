@@ -1,5 +1,17 @@
 import nodemailer from 'nodemailer';
 
+// HTML escape function to prevent injection
+function escapeHtml(text: string): string {
+  const map: { [key: string]: string } = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
+}
+
 // Configure nodemailer from environment variables
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -40,7 +52,7 @@ export const emailService = {
         <p>Hi ${recipientName},</p>
         <p><strong>${senderName}</strong> sent you a message in project <strong>${projectTitle}</strong>:</p>
         <blockquote style="border-left: 4px solid #3b82f6; padding-left: 10px; margin: 10px 0; color: #666;">
-          ${messagePreview}
+          ${escapeHtml(messagePreview)}
         </blockquote>
         <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin/projects/${projectId}" style="display: inline-block; padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px;">View Conversation</a>
       `,

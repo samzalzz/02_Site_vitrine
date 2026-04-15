@@ -76,6 +76,7 @@ export const createClientSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   company: z.string().optional(),
   phone: z.string().optional(),
+  status: z.enum(['active', 'inactive', 'prospect']).default('active').optional(),
   canLogin: z.boolean().default(false),
 });
 
@@ -103,7 +104,7 @@ export const updateProjectSchema = z.object({
   budget: z.coerce.number().optional(),
   timeline: z.string().optional(),
   status: z.enum(['prospect', 'active', 'completed', 'on-hold']).optional(),
-  clientId: z.string().optional(),
+  clientId: z.string().min(1).optional(),
 });
 
 // Chat message schema

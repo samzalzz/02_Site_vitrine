@@ -58,83 +58,78 @@ export const clientController = {
   },
 
   async update(req: AuthRequest, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const { name, company, phone, status, canLogin } = req.body;
+    const { id } = req.params;
+    const { name, company, phone, status, canLogin } = req.body;
 
-      const client = await prisma.client.update({
-        where: { id },
-        data: {
-          ...(name && { name }),
-          ...(company !== undefined && { company }),
-          ...(phone !== undefined && { phone }),
-          ...(status && { status }),
-          ...(typeof canLogin === 'boolean' && { canLogin }),
-        },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          company: true,
-          phone: true,
-          status: true,
-          canLogin: true,
-          createdAt: true,
-        },
-      });
-
-      res.json(client);
-    } catch (error: any) {
-      if (error.code === 'P2025') {
-        res.status(404).json({ error: 'Client not found' });
-      } else {
-        throw error;
-      }
+    // Verify client exists
+    const existing = await prisma.client.findUnique({ where: { id } });
+    if (!existing) {
+      res.status(404).json({ error: 'Client not found' });
+      return;
     }
+
+    const client = await prisma.client.update({
+      where: { id },
+      data: {
+        ...(name && { name }),
+        ...(company !== undefined && { company }),
+        ...(phone !== undefined && { phone }),
+        ...(status && { status }),
+        ...(typeof canLogin === 'boolean' && { canLogin }),
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        company: true,
+        phone: true,
+        status: true,
+        canLogin: true,
+        createdAt: true,
+      },
+    });
+
+    res.json(client);
   },
 
   async delete(req: AuthRequest, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      await prisma.client.delete({ where: { id } });
-      res.status(204).send();
-    } catch (error: any) {
-      if (error.code === 'P2025') {
-        res.status(404).json({ error: 'Client not found' });
-      } else {
-        throw error;
-      }
+    const { id } = req.params;
+
+    // Verify client exists
+    const existing = await prisma.client.findUnique({ where: { id } });
+    if (!existing) {
+      res.status(404).json({ error: 'Client not found' });
+      return;
     }
+
+    await prisma.client.delete({ where: { id } });
+    res.status(204).send();
   },
 
   async getById(req: AuthRequest, res: Response): Promise<void> {
     const { id } = req.params;
 
-    try {
-      const client = await prisma.client.findUnique({
-        where: { id },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          company: true,
-          phone: true,
-          status: true,
-          canLogin: true,
-          createdAt: true,
-          _count: { select: { projects: true } },
-        },
-      });
+    const client = await prisma.client.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        company: true,
+        phone: true,
+        status: true,
+        canLogin: true,
+        createdAt: true,
+        _count: { select: { projects: true } },
+      },
+    });
 
-      if (!client) {
-        res.status(404).json({ error: 'Client not found' });
-        return;
-      }
-
-      res.json(client);
-    } catch (error) {
-      throw error; // Let route's next(error) handle it
+    if (!client) {
+      res.status(404).json({ error: 'Client not found' });
+      return;
     }
+
+    res.json(client);
   },
 
   async getProjects(req: AuthRequest, res: Response): Promise<void> {

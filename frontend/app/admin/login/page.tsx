@@ -8,7 +8,10 @@ import { auth } from '@/lib/auth';
 import { Button } from '@/components/Button';
 import { cn } from '@/lib/cn';
 
-const schema = z.object({ password: z.string().min(1, 'Password is required') });
+const schema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
 type FormData = z.infer<typeof schema>;
 
 export default function AdminLoginPage() {
@@ -16,13 +19,13 @@ export default function AdminLoginPage() {
   const { register, handleSubmit, formState: { errors, isSubmitting }, setError } =
     useForm<FormData>({ resolver: zodResolver(schema) });
 
-  const onSubmit = async ({ password }: FormData) => {
+  const onSubmit = async ({ email, password }: FormData) => {
     try {
-      const { token } = await api.admin.login(password);
+      const { token } = await api.admin.login(email, password);
       auth.setToken(token);
       router.push('/admin');
     } catch {
-      setError('password', { message: 'Invalid password' });
+      setError('password', { message: 'Invalid email or password' });
     }
   };
 
@@ -31,6 +34,19 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm bg-white rounded-lg border border-neutral-200 shadow-sm p-8">
         <h1 className="text-2xl font-bold text-neutral-900 mb-6">Admin Login</h1>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-1">Email</label>
+            <input
+              {...register('email')}
+              type="email"
+              autoComplete="email"
+              className={cn(
+                'w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500',
+                errors.email ? 'border-red-300' : 'border-neutral-300'
+              )}
+            />
+            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
+          </div>
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1">Password</label>
             <input

@@ -24,12 +24,45 @@ router.get('/me/projects', authMiddleware, async (req, res, next) => {
             senderType: true,
             senderName: true,
             createdAt: true,
+            attachments: true,
           },
           orderBy: { createdAt: 'asc' },
         },
       },
     });
     res.json(projects);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/me/projects/:id', authMiddleware, async (req, res, next) => {
+  try {
+    if ((req as any).userType !== 'client') {
+      res.status(403).json({ error: 'Not a client' });
+      return;
+    }
+    const project = await prisma.clientProject.findUnique({
+      where: { id: req.params.id },
+      include: {
+        messages: {
+          select: {
+            id: true,
+            content: true,
+            senderType: true,
+            senderName: true,
+            createdAt: true,
+            attachments: true,
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+    if (!project || project.clientId !== (req as any).userId) {
+      res.status(404).json({ error: 'Project not found' });
+      return;
+    }
+    res.json(project);
   } catch (error) {
     next(error);
   }

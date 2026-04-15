@@ -11,7 +11,7 @@ interface ClientProject {
   title: string;
   description: string;
   status: string;
-  _count: { messages: number };
+  messages: Array<{ id: string }>;
 }
 
 export default function ClientDashboard() {
@@ -46,7 +46,7 @@ export default function ClientDashboard() {
                   <p className="text-sm text-neutral-600 mb-3">{project.description}</p>
                   <div className="flex items-center justify-between">
                     <span className="text-xs px-2 py-1 bg-neutral-100 rounded">{project.status}</span>
-                    <span className="text-xs text-neutral-500">{project._count.messages} messages</span>
+                    <span className="text-xs text-neutral-500">{project.messages.length} messages</span>
                   </div>
                 </div>
               </Card>

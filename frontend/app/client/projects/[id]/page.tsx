@@ -13,12 +13,19 @@ interface ProjectDetail {
   id: string;
   title: string;
   description: string;
+  status: string;
   messages: Array<{
     id: string;
     content: string;
     senderType: string;
     senderName: string;
     createdAt: string;
+    attachments: Array<{
+      id: string;
+      fileName: string;
+      originalName: string;
+      fileUrl: string;
+    }>;
   }>;
 }
 
@@ -28,6 +35,12 @@ interface Message {
   senderType: string;
   senderName: string;
   createdAt: string;
+  attachments: Array<{
+    id: string;
+    fileName: string;
+    originalName: string;
+    fileUrl: string;
+  }>;
 }
 
 const messageSchema = z.object({
@@ -53,12 +66,11 @@ export default function ClientProjectPage({ params }: { params: { id: string } }
     }
 
     // Fetch project
-    api.client.getProjects(token).then((projects) => {
-      const project = projects.find((p) => p.id === id);
-      if (project) {
-        setProject(project);
-        setMessages(project.messages || []);
-      }
+    api.client.getProjectById(token, id).then((project) => {
+      setProject(project);
+      setMessages(project.messages || []);
+    }).catch(() => {
+      router.push('/client/dashboard');
     });
 
     // Connect to socket
@@ -107,7 +119,10 @@ export default function ClientProjectPage({ params }: { params: { id: string } }
     <div className="flex flex-col gap-6">
       <Card>
         <div className="px-6 py-4">
-          <h1 className="text-2xl font-bold text-neutral-900">{project.title}</h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-2xl font-bold text-neutral-900">{project.title}</h1>
+            <span className="text-xs px-2 py-1 bg-neutral-100 rounded">{project.status}</span>
+          </div>
           <p className="text-neutral-600 mt-2">{project.description}</p>
         </div>
       </Card>
@@ -128,6 +143,21 @@ export default function ClientProjectPage({ params }: { params: { id: string } }
               >
                 <div className="text-xs font-medium opacity-70 mb-1">{msg.senderName}</div>
                 <p>{msg.content}</p>
+                {msg.attachments && msg.attachments.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {msg.attachments.map((attachment) => (
+                      <a
+                        key={attachment.id}
+                        href={attachment.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block text-xs underline opacity-70 hover:opacity-100"
+                      >
+                        📎 {attachment.originalName}
+                      </a>
+                    ))}
+                  </div>
+                )}
                 <div className="text-xs opacity-70 mt-1">{new Date(msg.createdAt).toLocaleString()}</div>
               </div>
             </div>

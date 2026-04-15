@@ -117,6 +117,13 @@ export const api = {
       if (!res.ok) throw new Error('Failed to fetch projects');
       return res.json();
     },
+    async getProjectById(token: string, id: string): Promise<any> {
+      const res = await fetch(`${API_BASE_URL}/clients/me/projects/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Failed to fetch project');
+      return res.json();
+    },
   },
   admin: {
     async login(email: string, password: string): Promise<{ token: string }> {

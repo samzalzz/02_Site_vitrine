@@ -2,12 +2,12 @@ import nodemailer from 'nodemailer';
 
 // Configure nodemailer from environment variables
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: parseInt(process.env.EMAIL_PORT || '587'),
-  secure: process.env.EMAIL_SECURE === 'true',
+  host: process.env.SMTP_HOST,
+  port: parseInt(process.env.SMTP_PORT || '587'),
+  secure: process.env.SMTP_SECURE === 'true',
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
 });
 
@@ -16,7 +16,7 @@ export const emailService = {
     const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/client/reset-password?token=${resetToken}`;
 
     await transporter.sendMail({
-      from: process.env.EMAIL_FROM || 'noreply@portfolio.local',
+      from: process.env.SMTP_FROM || 'noreply@portfolio.local',
       to: clientEmail,
       subject: 'Reset Your Password',
       html: `
@@ -30,9 +30,9 @@ export const emailService = {
     });
   },
 
-  async sendMessageNotificationEmail(recipientEmail: string, recipientName: string, senderName: string, projectTitle: string, messagePreview: string): Promise<void> {
+  async sendMessageNotificationEmail(recipientEmail: string, recipientName: string, senderName: string, projectTitle: string, messagePreview: string, projectId: string): Promise<void> {
     await transporter.sendMail({
-      from: process.env.EMAIL_FROM || 'noreply@portfolio.local',
+      from: process.env.SMTP_FROM || 'noreply@portfolio.local',
       to: recipientEmail,
       subject: `New message from ${senderName} - ${projectTitle}`,
       html: `
@@ -42,7 +42,7 @@ export const emailService = {
         <blockquote style="border-left: 4px solid #3b82f6; padding-left: 10px; margin: 10px 0; color: #666;">
           ${messagePreview}
         </blockquote>
-        <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin/projects/${projectTitle}" style="display: inline-block; padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px;">View Conversation</a>
+        <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin/projects/${projectId}" style="display: inline-block; padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px;">View Conversation</a>
       `,
     });
   },

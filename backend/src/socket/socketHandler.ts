@@ -108,7 +108,8 @@ export function initializeSocket(httpServer: Server) {
               project.client.name,
               data.userName,
               project.title,
-              content.substring(0, 100)
+              content.substring(0, 100),
+              projectId
             );
           }
         } catch (emailError) {
